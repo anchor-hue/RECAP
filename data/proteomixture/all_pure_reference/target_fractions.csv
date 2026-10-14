@@ -1,0 +1,11 @@
+ID,Lymphocyte,Stroma,Tumor
+Lymphocyte0_Stroma0.125_Tumor0.875__Rep1,0.0,0.125,0.875
+Lymphocyte0_Stroma0.25_Tumor0.75__Rep1,0.0,0.25,0.75
+Lymphocyte0_Stroma0.5_Tumor0.5__Rep1,0.0,0.5,0.5
+Lymphocyte0_Stroma0.75_Tumor0.25__Rep1,0.0,0.75,0.25
+Lymphocyte0_Stroma0.875_Tumor0.125__Rep1,0.0,0.875,0.125
+Lymphocyte0.5_Stroma0_Tumor0.5__Rep1,0.5,0.0,0.5
+Lymphocyte0.25_Stroma0_Tumor0.75__Rep1,0.25,0.0,0.75
+Lymphocyte0.125_Stroma0_Tumor0.875__Rep1,0.125,0.0,0.875
+Lymphocyte0.0625_Stroma0_Tumor0.9375__Rep1,0.0625,0.0,0.9375
+Lymphocyte0.03125_Stroma0_Tumor0.96875__Rep1,0.03125,0.0,0.96875

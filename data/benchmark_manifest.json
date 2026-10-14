@@ -1,0 +1,65 @@
+[
+  {
+    "name": "Derks2022",
+    "celltype_col": "CellType",
+    "ref_expr": "data/benchmarks/Derks2022/Derks_Q_Exactive_expr.csv",
+    "ref_meta": "data/benchmarks/Derks2022/Derks_Q_Exactive_meta.csv",
+    "spatial_expr": "data/benchmarks/Derks2022/simulated_spatial_Derks_timsTOF_SCP_s50/spatial.csv",
+    "target_fractions": "data/benchmarks/Derks2022/simulated_spatial_Derks_timsTOF_SCP_s50/spatial_fractions.csv",
+    "target_expression": "data/benchmarks/Derks2022/simulated_spatial_Derks_timsTOF_SCP_s50/spatial_expression_gt.npz"
+  },
+  {
+    "name": "Dou2019",
+    "celltype_col": "CellType",
+    "ref_expr": "data/benchmarks/Dou2019/SI005_Processed_sc_protein_data_expr.csv",
+    "ref_meta": "data/benchmarks/Dou2019/SI005_Processed_sc_protein_data_meta.csv",
+    "spatial_expr": "data/benchmarks/Dou2019/simulated_spatial_SI004_50ng_processed_s50/spatial.csv",
+    "target_fractions": "data/benchmarks/Dou2019/simulated_spatial_SI004_50ng_processed_s50/spatial_fractions.csv",
+    "target_expression": "data/benchmarks/Dou2019/simulated_spatial_SI004_50ng_processed_s50/spatial_expression_gt.npz"
+  },
+  {
+    "name": "GSE164378-log",
+    "celltype_col": "CellType",
+    "ref_expr": "data/benchmarks/GSE164378-log/GSE164378_batch1_expr.csv.gz",
+    "ref_meta": "data/benchmarks/GSE164378-log/GSE164378_batch1_meta.csv",
+    "spatial_expr": "data/benchmarks/GSE164378-log/simulated_spatial_GSE164378-log_batch2_s50/spatial.csv",
+    "target_fractions": "data/benchmarks/GSE164378-log/simulated_spatial_GSE164378-log_batch2_s50/spatial_fractions.csv",
+    "target_expression": "data/benchmarks/GSE164378-log/simulated_spatial_GSE164378-log_batch2_s50/spatial_expression_gt.npz"
+  },
+  {
+    "name": "Leduc2023",
+    "celltype_col": "CellType",
+    "ref_expr": "data/benchmarks/Leduc2023/leduc2023-fig5_expr.csv",
+    "ref_meta": "data/benchmarks/Leduc2023/leduc2023-fig5_meta.csv",
+    "spatial_expr": "data/benchmarks/Leduc2023/simulated_spatial_Leduc2023-fig7_s50/spatial.csv",
+    "target_fractions": "data/benchmarks/Leduc2023/simulated_spatial_Leduc2023-fig7_s50/spatial_fractions.csv",
+    "target_expression": "data/benchmarks/Leduc2023/simulated_spatial_Leduc2023-fig7_s50/spatial_expression_gt.npz"
+  },
+  {
+    "name": "cross-species-human-normalize",
+    "celltype_col": "CellType",
+    "ref_expr": "data/benchmarks/cross-species-human-normalize/cross-species_Human_with_h1n1_expr.csv",
+    "ref_meta": "data/benchmarks/cross-species-human-normalize/cross-species_Human_with_h1n1_meta.csv",
+    "spatial_expr": "data/benchmarks/cross-species-human-normalize/simulated_spatial-normalize_Human_ifgn_s50/spatial.csv",
+    "target_fractions": "data/benchmarks/cross-species-human-normalize/simulated_spatial-normalize_Human_ifgn_s50/spatial_fractions.csv",
+    "target_expression": "data/benchmarks/cross-species-human-normalize/simulated_spatial-normalize_Human_ifgn_s50/spatial_expression_gt.npz"
+  },
+  {
+    "name": "cross-species-monkey-normalize",
+    "celltype_col": "CellType",
+    "ref_expr": "data/benchmarks/cross-species-monkey-normalize/cross-species_Rheus_macaques_ifgn_expr.csv",
+    "ref_meta": "data/benchmarks/cross-species-monkey-normalize/cross-species_Rheus_macaques_ifgn_meta.csv",
+    "spatial_expr": "data/benchmarks/cross-species-monkey-normalize/simulated_spatial-normalize_Cynomolgus_monkeys_ifgn_s50/spatial.csv",
+    "target_fractions": "data/benchmarks/cross-species-monkey-normalize/simulated_spatial-normalize_Cynomolgus_monkeys_ifgn_s50/spatial_fractions.csv",
+    "target_expression": "data/benchmarks/cross-species-monkey-normalize/simulated_spatial-normalize_Cynomolgus_monkeys_ifgn_s50/spatial_expression_gt.npz"
+  },
+  {
+    "name": "murine",
+    "celltype_col": "CellType",
+    "ref_expr": "data/benchmarks/murine/murine_N2_SCP_exp.csv",
+    "ref_meta": "data/benchmarks/murine/murine_N2_SCP_meta.csv",
+    "spatial_expr": "data/benchmarks/murine/simulated_spatial_nanoPOTS_s50/spatial.csv",
+    "target_fractions": "data/benchmarks/murine/simulated_spatial_nanoPOTS_s50/spatial_fractions.csv",
+    "target_expression": "data/benchmarks/murine/simulated_spatial_nanoPOTS_s50/spatial_expression_gt.npz"
+  }
+]

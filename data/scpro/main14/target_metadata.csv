@@ -1,0 +1,19 @@
+Raw,ID,Group,CellType
+[1] KPC_FFPE_mIHC_DIA_Acinar_1_Slot2-28_1_7951.d.PG.Quantity,Acinar_1,Acinar,Acinar
+[2] KPC_FFPE_mIHC_DIA_Acinar_2_Slot2-29_1_7952.d.PG.Quantity,Acinar_2,Acinar,Acinar
+[3] KPC_FFPE_mIHC_DIA_Acinar_4_Slot2-31_1_7955.d.PG.Quantity,Acinar_4,Acinar,Acinar
+[13] KPC_FFPE_mIHC_DIA_PanIN_1_Slot2-32_1_7957.d.PG.Quantity,PanIN_1,PanIN,PanIN
+[14] KPC_FFPE_mIHC_DIA_PanIN_3_Slot2-34_1_7960.d.PG.Quantity,PanIN_3,PanIN,PanIN
+[15] KPC_FFPE_mIHC_DIA_PanIN_4_Slot2-35_1_7961.d.PG.Quantity,PanIN_4,PanIN,PanIN
+[16] KPC_FFPE_mIHC_DIA_PDAC_1_Slot2-32_1_7999.d.PG.Quantity,PDAC_1,PDAC,PDAC
+[17] KPC_FFPE_mIHC_DIA_PDAC_3_Slot2-34_1_8002.d.PG.Quantity,PDAC_3,PDAC,PDAC
+[18] KPC_FFPE_mIHC_DIA_PDAC_4_Slot2-35_1_8003.d.PG.Quantity,PDAC_4,PDAC,PDAC
+[4] KPC_FFPE_mIHC_DIA_CAF_1_Slot2-14_1_7977.d.PG.Quantity,CAF_1,CAF,CAF
+[5] KPC_FFPE_mIHC_DIA_CAF_2_Slot2-15_1_7978.d.PG.Quantity,CAF_2,CAF,CAF
+[6] KPC_FFPE_mIHC_DIA_CAF_3_Slot2-16_1_7980.d.PG.Quantity,CAF_3,CAF,CAF
+[7] KPC_FFPE_mIHC_DIA_IT_1_Slot2-19_1_7982.d.PG.Quantity,IT_1,IT,IT
+[8] KPC_FFPE_mIHC_DIA_IT_2_Slot2-20_1_7983.d.PG.Quantity,IT_2,IT,IT
+[9] KPC_FFPE_mIHC_DIA_IT_3_Slot2-21_1_7985.d.PG.Quantity,IT_3,IT,IT
+[10] KPC_FFPE_mIHC_DIA_LN_1_Slot2-37_1_7965.d.PG.Quantity,LN_1,LN,LN
+[11] KPC_FFPE_mIHC_DIA_LN_2_Slot2-38_1_7966.d.PG.Quantity,LN_2,LN,LN
+[12] KPC_FFPE_mIHC_DIA_LN_4_Slot2-11_1_7972.d.PG.Quantity,LN_4,LN,LN

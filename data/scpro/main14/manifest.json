@@ -1,0 +1,42 @@
+{
+  "dataset": "SCPro",
+  "mode": "main14",
+  "preset_or_custom_mode": "main14",
+  "mode_description": "All 14 FACS-sorted reference types; all 18 spatial targets.",
+  "requested_reference_types": null,
+  "requested_target_groups": null,
+  "collapsed_to_lineage": false,
+  "reference_source": "ct_dataset_01",
+  "target_source": "sp_dataset_03",
+  "n_reference_samples": 69,
+  "n_target_samples": 18,
+  "n_proteins": 4667,
+  "reference_cell_types": [
+    "B",
+    "CAF",
+    "DC",
+    "MAC",
+    "MO",
+    "MYE",
+    "NEU",
+    "PCC",
+    "T4",
+    "T8",
+    "Treg",
+    "apCAF",
+    "iCAF",
+    "myCAF"
+  ],
+  "target_groups": [
+    "Acinar",
+    "CAF",
+    "IT",
+    "LN",
+    "PDAC",
+    "PanIN"
+  ],
+  "scaling": "reference_zscore",
+  "target_has_exact_fractions": false,
+  "target_has_exact_component_expression_truth": false,
+  "model_normalization_recommendation": "none"
+}

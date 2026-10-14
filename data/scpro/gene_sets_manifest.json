@@ -1,0 +1,10 @@
+{
+  "GO_Biological_Process_2025.gmt": {
+    "sha256": "1da706f11c4e298b9e2f1c35c6c9758750f3cf80d193ab46f29d4c750d05a075",
+    "bytes": 1355236
+  },
+  "Reactome_Pathways_2024.gmt": {
+    "sha256": "0d5795fb4147d382826260056cb6acc478d3dd15b7679dc2aa4f32260f98c6c8",
+    "bytes": 886333
+  }
+}

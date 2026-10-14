@@ -1,0 +1,46 @@
+{
+  "dataset": "SCPro",
+  "mode": "immune9",
+  "preset_or_custom_mode": "immune9",
+  "mode_description": "Nine immune reference types; IT and LN targets.",
+  "requested_reference_types": [
+    "T4",
+    "T8",
+    "Treg",
+    "B",
+    "MYE",
+    "NEU",
+    "MO",
+    "MAC",
+    "DC"
+  ],
+  "requested_target_groups": [
+    "IT",
+    "LN"
+  ],
+  "collapsed_to_lineage": false,
+  "reference_source": "ct_dataset_01",
+  "target_source": "sp_dataset_03",
+  "n_reference_samples": 45,
+  "n_target_samples": 6,
+  "n_proteins": 4667,
+  "reference_cell_types": [
+    "B",
+    "DC",
+    "MAC",
+    "MO",
+    "MYE",
+    "NEU",
+    "T4",
+    "T8",
+    "Treg"
+  ],
+  "target_groups": [
+    "IT",
+    "LN"
+  ],
+  "scaling": "reference_zscore",
+  "target_has_exact_fractions": false,
+  "target_has_exact_component_expression_truth": false,
+  "model_normalization_recommendation": "none"
+}

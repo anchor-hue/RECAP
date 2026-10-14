@@ -1,0 +1,35 @@
+{
+  "dataset": "SCPro",
+  "mode": "treg8",
+  "preset_or_custom_mode": "treg8",
+  "mode_description": "All ct_dataset_02 Treg-related groups; IT and LN targets.",
+  "requested_reference_types": null,
+  "requested_target_groups": [
+    "IT",
+    "LN"
+  ],
+  "collapsed_to_lineage": false,
+  "reference_source": "ct_dataset_02",
+  "target_source": "sp_dataset_03",
+  "n_reference_samples": 24,
+  "n_target_samples": 6,
+  "n_proteins": 3155,
+  "reference_cell_types": [
+    "KPC_425KN",
+    "KPC_425KP",
+    "KPC_425N",
+    "KPC_425P",
+    "KPC_4KN",
+    "KPC_4KP",
+    "KPC_8KN",
+    "KPC_8KP"
+  ],
+  "target_groups": [
+    "IT",
+    "LN"
+  ],
+  "scaling": "reference_zscore",
+  "target_has_exact_fractions": false,
+  "target_has_exact_component_expression_truth": false,
+  "model_normalization_recommendation": "none"
+}

@@ -1,0 +1,4 @@
+ID,CellType
+Lymphocyte1_Stroma0_Tumor0__Rep2,Lymphocyte
+Lymphocyte0_Stroma1_Tumor0__Rep2,Stroma
+Lymphocyte0_Stroma0_Tumor1__Rep2,Tumor
