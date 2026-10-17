@@ -1,5 +1,8 @@
 """Scientific evaluation checks; no training or GPU is required."""
 import unittest
+import contextlib
+import io
+import json
 import tempfile
 from pathlib import Path
 from unittest.mock import patch
@@ -11,7 +14,10 @@ from recap.metrics import (
     compute_standardized_expression_metrics, compute_weighted_expression_metrics,
     constant_expression_proteins, standardize_expression_all_entries,
 )
-from scripts.summarize_benchmarks import METRICS, seed_macro_means, summarize_seed
+from scripts.summarize_benchmarks import (
+    METRICS, main as summarize_main, protein_coverage_union, seed_macro_means,
+    summarize_seed, summarize_union_coverage,
+)
 
 
 class ExpressionEvaluationTests(unittest.TestCase):
@@ -129,6 +135,71 @@ class ExpressionEvaluationTests(unittest.TestCase):
             self.assertAlmostEqual(row["table2A_standardized_weighted_CCC"], expected_a["CCC"])
             self.assertAlmostEqual(row["table2B_input_scale_weighted_CCC"], expected_b["CCC"])
             self.assertEqual(row["zero_fraction_entries"], 1)
+
+
+class CoverageUnionTests(unittest.TestCase):
+    def test_union_counts_distinct_gt_proteins_and_excludes_extra_outputs(self):
+        panels = [["a", "b", "extra", "a"], ["b", "c"]]
+        self.assertEqual(protein_coverage_union(["a", "b", "c", "d"], panels), 0.75)
+        self.assertEqual(protein_coverage_union(["a", "b", "c", "d"], panels[::-1]), 0.75)
+        self.assertEqual(protein_coverage_union(["a", "b", "c", "d"], panels[:1]), 0.5)
+        with self.assertRaises(ValueError):
+            protein_coverage_union([], panels)
+        with self.assertRaises(ValueError):
+            protein_coverage_union(["a"], [])
+
+    def test_missing_requested_seed_is_not_silently_ignored(self):
+        data = {"example": {"truth": {"a", "b"}, "predictions": {2021: {"a"}}}}
+        with self.assertRaises(ValueError):
+            summarize_union_coverage(data, [2021, 2022])
+
+    def test_cli_reports_union_then_equal_dataset_mean_without_seed_sd(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "data").mkdir()
+            manifest, panels = [], []
+            for dataset, n_proteins in [("small", 3), ("large", 4)]:
+                proteins = [f"p{i}" for i in range(n_proteins)]
+                truth = np.arange(4 * n_proteins, dtype=float).reshape(2, 2, n_proteins)
+                spots, types = ["s1", "s2"], ["a", "b"]
+                np.savez(root / f"{dataset}.npz", E=truth, spot_names=spots,
+                         cell_types=types, proteins=proteins)
+                pd.DataFrame([[0.6, 0.4], [1., 0.]], index=spots, columns=types).to_csv(
+                    root / f"{dataset}.csv")
+                manifest.append({"name": dataset, "target_expression": f"{dataset}.npz",
+                                 "target_fractions": f"{dataset}.csv"})
+                panels.append({"dataset": dataset, "proteins": ["p1"]})
+                for seed, selected in [(2021, ["p0", "p1"]), (2022, ["p1", "p2"])]:
+                    run = root / "results" / dataset / f"seed_{seed}"
+                    run.mkdir(parents=True)
+                    pd.DataFrame([{m: 0.9 for m in METRICS if m.startswith("target_fraction_")}]).to_csv(
+                        run / "metrics.csv", index=False)
+                    np.savez(run / "target_celltype_expression_input_scale.npz",
+                             E=truth[:, :, [proteins.index(p) for p in selected]] * 1.1 + 0.2,
+                             spot_names=spots, cell_types=types, proteins=selected)
+            (root / "data/benchmark_manifest.json").write_text(json.dumps(manifest))
+            (root / "data/benchmark_common_protein_panels.json").write_text(json.dumps(panels))
+            out = root / "summary"
+            argv = ["summarize_benchmarks.py", "--seeds", "2021,2022",
+                    "--results-root", str(root / "results"), "--outdir", str(out)]
+            with patch("scripts.summarize_benchmarks.ROOT", root), patch("sys.argv", argv):
+                with contextlib.redirect_stdout(io.StringIO()):
+                    summarize_main()
+            coverage = pd.read_csv(out / "coverage_by_dataset.csv").set_index("dataset")
+            self.assertEqual(coverage.loc["small", "protein_coverage"], 1.)
+            self.assertEqual(coverage.loc["large", "protein_coverage"], 0.75)
+            self.assertTrue((coverage["n_seeds"] == 2).all())
+            self.assertAlmostEqual(pd.read_csv(out / "coverage_summary.csv")["mean"].iloc[0], 87.5)
+            summary = pd.read_csv(out / "cross_dataset_summary.csv", index_col="metric")
+            self.assertAlmostEqual(summary.loc["protein_coverage", "mean"], 0.875)
+            self.assertTrue(np.isnan(summary.loc["protein_coverage", "sample_std"]))
+            self.assertTrue(np.isnan(summary.loc["protein_coverage", "valid_seed_count"]))
+            self.assertNotIn("protein_coverage", pd.read_csv(out / "seed_macro.csv").columns)
+            self.assertIn("run_protein_coverage", pd.read_csv(out / "per_run.csv").columns)
+            self.assertEqual(summary.loc["table2A_standardized_weighted_CCC", "valid_seed_count"], 2)
+            self.assertAlmostEqual(summary.loc["table2A_standardized_weighted_CCC", "mean"], 1.)
+            protocol = json.loads((out / "evaluation_protocol.json").read_text())
+            self.assertEqual(protocol["coverage"]["seeds"], [2021, 2022])
 
 
 if __name__ == "__main__":

@@ -21,7 +21,6 @@ METRICS = (
     "full_input_scale_weighted_CCC", "full_input_scale_weighted_Pearson_r",
     "table2A_standardized_weighted_CCC", "table2A_standardized_weighted_Pearson_r",
     "table2B_input_scale_weighted_CCC", "table2B_input_scale_weighted_Pearson_r",
-    "protein_coverage",
 )
 
 
@@ -32,7 +31,32 @@ def labels(values, name):
     return names
 
 
-def summarize_seed(seed, results_root, manifest, panels):
+def protein_coverage_union(truth_proteins, predicted_protein_sets):
+    """Coverage of GT proteins in the union across the selected seeds."""
+    truth = set(map(str, truth_proteins))
+    panels = [set(map(str, proteins)) for proteins in predicted_protein_sets]
+    if not truth or not panels:
+        raise ValueError("Coverage requires GT proteins and at least one seed.")
+    return len(truth & set().union(*panels)) / len(truth)
+
+
+def summarize_union_coverage(coverage_sets, seeds):
+    rows = []
+    for dataset, data in coverage_sets.items():
+        if set(data["predictions"]) != set(seeds):
+            raise ValueError(f"Coverage seed set differs: {dataset}")
+        fraction = protein_coverage_union(
+            data["truth"], [data["predictions"][seed] for seed in seeds],
+        )
+        rows.append({"dataset": dataset, "method": "RECAP", "n_seeds": len(seeds),
+                     "n_gt_proteins": len(data["truth"]),
+                     "n_covered_gt_proteins": len(data["truth"] & set().union(
+                         *(data["predictions"][seed] for seed in seeds))),
+                     "protein_coverage": fraction, "coverage_percent": 100 * fraction})
+    return pd.DataFrame(rows)
+
+
+def summarize_seed(seed, results_root, manifest, panels, coverage_sets=None):
     rows = []
     for item in manifest:
         path = results_root / item["name"] / f"seed_{seed}" / "metrics.csv"
@@ -75,6 +99,11 @@ def summarize_seed(seed, results_root, manifest, panels):
             reference = reference_all[:, :, [truth_names.index(p) for p in panel]]
             direct = compute_weighted_expression_metrics(estimate, reference, fractions)
             standardized, audit = compute_standardized_expression_metrics(estimate, reference, fractions)
+        if coverage_sets is not None:
+            data = coverage_sets.setdefault(item["name"], {"truth": truth_proteins, "predictions": {}})
+            if data["truth"] != truth_proteins or seed in data["predictions"]:
+                raise ValueError(f"Inconsistent GT proteins or duplicate seed: {item['name']}")
+            data["predictions"][seed] = predicted_proteins
         rows.append({
             "dataset": item["name"], "seed": seed,
             **{m: float(values[m]) for m in METRICS if m.startswith("target_fraction_")},
@@ -91,7 +120,7 @@ def summarize_seed(seed, results_root, manifest, panels):
                 p for p, keep in zip(panel, audit["retained_proteins"]) if not keep
             ]),
             "zero_fraction_entries": int((fractions == 0).sum()),
-            "protein_coverage": len(predicted_proteins & truth_proteins) / len(truth_proteins),
+            "run_protein_coverage": len(predicted_proteins & truth_proteins) / len(truth_proteins),
         })
     return pd.DataFrame(rows)
 
@@ -122,23 +151,29 @@ def main() -> None:
     panels = {item["dataset"]: item["proteins"] for item in json.loads(
         (ROOT / "data/benchmark_common_protein_panels.json").read_text()
     )}
-    tables = []
+    tables, coverage_sets = [], {}
     # Read every requested run before creating outputs; missing runs fail explicitly.
     for seed in seeds:
-        tables.append(summarize_seed(seed, args.results_root, manifest, panels))
+        tables.append(summarize_seed(seed, args.results_root, manifest, panels, coverage_sets))
         print(f"Evaluated seed {seed} across {len(manifest)} datasets", flush=True)
     table = pd.concat(tables, ignore_index=True)
     macro = seed_macro_means(table, len(manifest))
     summary = macro.agg(["mean", "std", "count"]).T.rename(columns={
         "std": "sample_std", "count": "valid_seed_count",
     })
-    summary["valid_seed_count"] = summary["valid_seed_count"].astype(int)
+    coverage = summarize_union_coverage(coverage_sets, seeds)
+    coverage_summary = coverage.groupby("method")["coverage_percent"].agg(["mean", "min", "max"])
+    # Coverage is one union statistic, not a per-seed metric with a seed SD.
+    summary.loc["protein_coverage", "mean"] = coverage["protein_coverage"].mean()
+    summary["valid_seed_count"] = summary["valid_seed_count"].astype("Int64")
     args.outdir.mkdir(parents=True, exist_ok=True)
     for seed, seed_table in table.groupby("seed", sort=False):
         seed_table.to_csv(args.outdir / f"seed_{seed}_per_dataset.csv", index=False)
         macro.loc[seed].to_frame(name="macro_mean").to_csv(
             args.outdir / f"seed_{seed}_macro_mean.csv"
         )
+    coverage.to_csv(args.outdir / "coverage_by_dataset.csv", index=False)
+    coverage_summary.to_csv(args.outdir / "coverage_summary.csv")
     table.to_csv(args.outdir / "per_run.csv", index=False)
     macro.to_csv(args.outdir / "seed_macro.csv")
     summary.to_csv(args.outdir / "cross_dataset_summary.csv", index_label="metric")
@@ -153,6 +188,11 @@ def main() -> None:
         "table2B": "input-file scale, no additional standardization, common panel",
         "full_input_scale": "input-file scale, all available GT/output proteins",
         "metric_weights": "true cell fractions; weighted central moments",
+        "coverage": {"definition": "GT proteins covered by union of outputs across selected seeds",
+                     "seeds": seeds, "dataset_aggregation": "equal dataset mean",
+                     "units": "protein_coverage: fraction; coverage_percent and coverage_summary: percent",
+                     "per_run_diagnostic": "run_protein_coverage; excluded from seed macro averages",
+                     "seed_standard_deviation": "not applicable to the union statistic"},
         "aggregation": "equal dataset means per seed; mean and sample SD (ddof=1) across seeds",
         "undefined_metrics": "NaN; incomplete dataset sets invalidate the seed metric",
         "scope": "RECAP only; competing methods and their input adapters are not packaged",
