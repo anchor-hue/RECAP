@@ -147,6 +147,11 @@ def compute_weighted_expression_metrics(pred_E: np.ndarray, gt_E: np.ndarray, fr
     vx = np.sum(weight * (x - mx) ** 2) / total
     vy = np.sum(weight * (y - my) ** 2) / total
     cov = np.sum(weight * (x - mx) * (y - my)) / total
+    # Exact equality avoids spurious variance from the mean of repeated decimals.
+    if x.max() == x.min():
+        vx, cov = 0.0, 0.0
+    if y.max() == y.min():
+        vy, cov = 0.0, 0.0
     corr = cov / np.sqrt(vx * vy) if vx > 0 and vy > 0 else float("nan")
     denom = vx + vy + (mx - my) ** 2
     ccc = 2 * cov / denom if denom > 0 else float("nan")
@@ -162,6 +167,64 @@ def compute_weighted_expression_metrics(pred_E: np.ndarray, gt_E: np.ndarray, fr
         "TrueStd": float(np.sqrt(vy)),
         "StdRatio": float(np.sqrt(vx) / (np.sqrt(vy) + 1e-12)),
     }
+
+
+def constant_expression_proteins(expression: np.ndarray) -> np.ndarray:
+    """Exact per-protein constancy across ALL sample--cell-type entries."""
+    values = np.asarray(expression, dtype=np.float64)
+    if values.ndim != 3 or min(values.shape) == 0:
+        raise ValueError("Expression must be a nonempty sample x cell-type x protein array.")
+    flat = values.reshape(-1, values.shape[-1])
+    if flat.shape[0] < 2 or not np.isfinite(flat).all():
+        raise ValueError("Standardization requires at least two finite entries per protein.")
+    return flat.max(axis=0) == flat.min(axis=0)
+
+
+def standardize_expression_all_entries(expression: np.ndarray) -> np.ndarray:
+    """Own unweighted per-protein z-scores, ddof=1, including zero-fraction pairs.
+
+    Exactly constant proteins are zero. Prediction normalization never uses
+    fraction weights or ground-truth normalization parameters.
+    """
+    values = np.asarray(expression, dtype=np.float64)
+    constant = constant_expression_proteins(values)
+    flat = values.reshape(-1, values.shape[-1])
+    mean, sd = flat.mean(axis=0), flat.std(axis=0, ddof=1)
+    if not np.isfinite(sd).all() or ((sd == 0) & ~constant).any():
+        raise ValueError("Invalid per-protein standard deviation.")
+    standardized = (flat - mean) / np.where(constant, 1.0, sd)
+    standardized[:, constant] = 0.0
+    if not np.isfinite(standardized).all():
+        raise ValueError("Nonfinite standardized expression.")
+    return standardized.reshape(values.shape)
+
+
+def compute_standardized_expression_metrics(
+    pred_E: np.ndarray, gt_E: np.ndarray, fractions: np.ndarray,
+) -> Tuple[Dict[str, float], Dict[str, np.ndarray]]:
+    """Table 2A protocol on an already aligned common protein panel.
+
+    A GT-only mask excludes constant truth proteins for every method/seed.
+    Constant predictions remain with standardized value zero. Only the final
+    moments use true-fraction weights; zero-weight entries still contribute
+    to both independent all-entry standardizations.
+    """
+    pred_E, gt_E = np.asarray(pred_E, dtype=float), np.asarray(gt_E, dtype=float)
+    fractions = np.asarray(fractions, dtype=float)
+    if pred_E.shape != gt_E.shape or fractions.shape != gt_E.shape[:2]:
+        raise ValueError("Expression or fraction shapes differ.")
+    if not np.isfinite(fractions).all() or (fractions < 0).any() or fractions.sum() <= 0:
+        raise ValueError("True fractions must be finite, nonnegative, and have positive total.")
+    constant_prediction = constant_expression_proteins(pred_E)
+    keep = ~constant_expression_proteins(gt_E)
+    if not keep.any():
+        raise ValueError("No variable ground-truth proteins on the common panel.")
+    metrics = compute_weighted_expression_metrics(
+        standardize_expression_all_entries(pred_E[:, :, keep]),
+        standardize_expression_all_entries(gt_E[:, :, keep]), fractions,
+    )
+    return metrics, {"retained_proteins": keep,
+                     "constant_prediction_proteins": constant_prediction & keep}
 
 
 def load_expression_truth_npz(path: str) -> np.ndarray:
