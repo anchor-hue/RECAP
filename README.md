@@ -11,6 +11,7 @@ Use Python 3.10 and install the dependencies:
 python -m pip install -r requirements.txt
 ```
 
+For dataset descriptions, original data sources, and test-mixture construction, see [DATASETS.md](DATASETS.md).
 ## Benchmark datasets
 
 Run one dataset (dataset names are listed in `data/benchmark_manifest.json`):
