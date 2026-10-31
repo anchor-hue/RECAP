@@ -10,7 +10,7 @@ from recap import DAProDeconvConfig, DAProDeconvPipeline
 
 
 ROOT = Path(__file__).resolve().parent
-PHYSICAL_DESIGNS = ("replicate_holdout_A", "replicate_holdout_B", "all_pure_reference")
+PHYSICAL_DESIGNS = ("all_pure_reference",)
 SCPRO_MODES = ("immune9", "treg8", "main14")
 
 
@@ -79,6 +79,8 @@ def resolve_inputs(args: argparse.Namespace) -> dict:
 
 def main() -> None:
     args = parser().parse_args()
+    if args.experiment == "physical" and args.seed != 2021:
+        raise ValueError("ProteoMixture uses the fixed random seed 2021")
     inputs = resolve_inputs(args)
     for key in ("ref", "metadata", "target", "fractions", "expression"):
         path = inputs[key]
@@ -89,6 +91,9 @@ def main() -> None:
     cfg = DAProDeconvConfig(
         seed=args.seed, device=args.device, dirichlet_alphas=alphas,
         dirichlet_alpha_weights=[1.0 / len(alphas)] * len(alphas),
+        # ProteoMixture inputs already share one reference-fitted z-score.
+        # Skip only the model's second, separate normalization of each table.
+        normalize="none" if args.experiment == "physical" else "z_score",
         target_type=(
             "simulated" if args.experiment == "benchmark"
             or (args.experiment == "custom" and inputs["expression"] is not None)

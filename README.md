@@ -11,8 +11,8 @@ Use Python 3.10 and install the dependencies:
 python -m pip install -r requirements.txt
 ```
 
-
 ## Benchmark datasets
+
 For dataset descriptions, original data sources, and test-mixture construction, see [DATASETS.md](DATASETS.md).
 
 Run one dataset (dataset names are listed in `data/benchmark_manifest.json`):
@@ -40,33 +40,37 @@ For multiple GPUs, use `--devices cuda:0,cuda:1`.
 
 ## Physical ProteoMixture analysis
 
-```bash
-for design in replicate_holdout_A replicate_holdout_B all_pure_reference; do
-  python run_recap.py physical --design "$design" --seed 2021 --device cuda:0
-done
-python scripts/analyze_physical.py --seed 2021
-```
+The packaged `all_pure_reference` design uses all six pure profiles (two per
+component) as the reference and ten measured mixtures as targets. Reference
+and target inputs retain the single protein-wise z-score fitted to the pure
+reference during preprocessing.
 
-Alternatively, train the three designs in parallel before running the analysis:
+Run the model and summarize fraction recovery without generating figures:
 
 ```bash
-python scripts/run_downstream_models.py --experiment physical --devices cuda:0,cuda:1,cuda:2
+python scripts/run_proteomixture.py --device cuda:0
+python scripts/analyze_proteomixture.py
 ```
+
+Model outputs are written to `results/physical/all_pure_reference/seed_2021/`;
+fraction summaries are written to `results/physical/analysis_output_fraction_only/`.
+The predefined mixture proportions are the fraction-recovery endpoint; the
+measured mixtures have no independent cell-type-resolved expression truth.
 
 ## SCPro spatial analysis
 
+SCPro uses separate scripts and retains its existing model normalization and
+training settings. Run the `immune9`, `treg8`, and `main14` modes, then compute
+the spatial summaries and T8 gene-set analysis. These scripts do not draw figures.
+
 ```bash
-for mode in immune9 treg8 main14; do
-  python run_recap.py scpro --mode "$mode" --seed 2021 --device cuda:0
-done
+python scripts/run_scpro.py --devices cuda:0
 python scripts/analyze_scpro.py --seed 2021
 ```
 
-Alternatively, train the three panels in parallel before running the analysis:
-
-```bash
-python scripts/run_downstream_models.py --experiment scpro --devices cuda:0,cuda:1,cuda:2
-```
+For multiple GPUs, use `--devices cuda:0,cuda:1,cuda:2`.
+SCPro model outputs are under `results/scpro/`; summaries are under
+`analysis/scpro/`.
 
 ## Evaluation tests
 

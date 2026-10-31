@@ -1,4 +1,4 @@
-"""Fraction-only ProteoMixture analysis; reads saved proportions and fixed truth."""
+"""Summarize the fixed all-pure ProteoMixture fraction experiment; no figures."""
 from pathlib import Path
 import argparse
 import json
@@ -13,12 +13,22 @@ parser.add_argument('--prep-dir',type=Path,default=PREP)
 parser.add_argument('--out-dir',type=Path)
 parser.add_argument('--seed',type=int,default=2021)
 args = parser.parse_args()
+if args.seed != 2021:
+    parser.error('ProteoMixture uses the fixed random seed 2021')
 root = args.result_dir.resolve()
 out = args.out_dir or root/'analysis_output_fraction_only'
-out.mkdir(parents=True,exist_ok=True)
 cells = ['Lymphocyte','Stroma','Tumor']
-designs = ['replicate_holdout_A','replicate_holdout_B','all_pure_reference']
-labels = dict(zip(designs,['Reference A','Reference B','All-pure reference']))
+designs = ['all_pure_reference']
+labels = {'all_pure_reference': 'All-pure reference'}
+
+run_config = root/'all_pure_reference'/f'seed_{args.seed}'/'config.json'
+config = json.loads(run_config.read_text())
+if config.get('seed') != 2021 or config.get('normalize') != 'none':
+    raise ValueError(f'Expected seed 2021 and no second model z-score in {run_config}')
+reference_labels = pd.read_csv(args.prep_dir/'all_pure_reference'/'reference_labels.csv')
+if reference_labels.CellType.value_counts().to_dict() != {cell: 2 for cell in cells}:
+    raise ValueError('The all-pure reference must contain two pure samples per cell type')
+out.mkdir(parents=True,exist_ok=True)
 
 def metrics(x,y):
     x,y = np.asarray(x,dtype=float),np.asarray(y,dtype=float)
@@ -67,7 +77,8 @@ pd.DataFrame(by_series).to_csv(out/'fraction_series_summary.csv',index=False)
 pd.DataFrame(by_cell).to_csv(out/'fraction_series_component_summary.csv',index=False)
 pd.DataFrame(mapping).to_csv(out/'file_mapping.csv',index=False)
 (out/'analysis_scope.json').write_text(json.dumps({'endpoint':'component-fraction estimation','designs':designs,
- 'scale':'predefined component proportions','ccc_moment_ddof':0,'evaluates_expression':False,
+ 'scale':'predefined component proportions','preprocessing':'shared reference-fitted z-score',
+ 'model_normalize':'none','seed':args.seed,'ccc_moment_ddof':0,'evaluates_expression':False,
  'evaluates_reconstruction':False,'reruns_training':False,'n_entries_per_design':30},indent=2)+'\n')
 print(pd.DataFrame(summary).to_string(index=False))
 print('Saved fraction-only results:',out)

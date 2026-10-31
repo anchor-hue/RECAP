@@ -32,7 +32,7 @@ Processed inputs and ground-truth files are organized under `data/benchmarks/`. 
 
 The ProteoMixture benchmark contains ten experimentally prepared physical mixtures with predefined component proportions and 6,129 proteins: five Tumor–Stroma mixtures and five Tumor–Lymphocyte mixtures. The original data are available through [PRIDE PXD044157](https://www.omicsdi.org/dataset/pride/PXD044157).
 
-Three reference configurations were evaluated: all pure profiles, replicate holdout A, and replicate holdout B. The corresponding processed inputs are available under `data/proteomixture/`.
+The current fraction-recovery experiment uses all six pure profiles as the reference and fixes the random seed at 2021. Reference and mixture inputs share one reference-fitted protein-wise z-score from preprocessing; the model does not apply a second, separate z-score to either table. The processed inputs are available under `data/proteomixture/all_pure_reference/`.
 
 ### SCPro
 
