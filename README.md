@@ -41,9 +41,7 @@ For multiple GPUs, use `--devices cuda:0,cuda:1`.
 ## Physical ProteoMixture analysis
 
 The packaged `all_pure_reference` design uses all six pure profiles (two per
-component) as the reference and ten measured mixtures as targets. Reference
-and target inputs retain the single protein-wise z-score fitted to the pure
-reference during preprocessing.
+component) as the reference and ten measured mixtures as targets.
 
 Run the model and summarize fraction recovery without generating figures:
 
